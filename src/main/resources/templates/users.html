@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Management</title>
+</head>
+<body>
+
+<h3>Add User</h3>
+<form method="post" th:action="@{/}" th:object="${user}">
+    <div>
+        <label for="name">First Name:</label>
+        <input id="name" placeholder="Enter First Name" required type="text" th:field="*{name}"/>
+        <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" style="color:#ff0000;"></div>
+    </div>
+
+    <div>
+        <label for="lastName">Last Name:</label>
+        <input id="lastName" placeholder="Enter Last Name" required type="text" th:field="*{lastName}"/>
+        <div th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}" style="color:red;"></div>
+    </div>
+
+    <div>
+        <label for="age">Age:</label>
+        <input id="age" placeholder="Enter Age" required type="text" th:field="*{age}"/>
+        <div th:if="${#fields.hasErrors('age')}" th:errors="*{age}" style="color:red;"></div>
+    </div>
+
+    <input type="submit" value="Add User">
+</form>
+
+<h3>All Users:</h3>
+<table border="1">
+    <thead>
+    <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Name</th>
+        <th scope="col">Last Name</th>
+        <th scope="col">Age</th>
+        <th scope="col">Delete User</th>
+        <th scope="col">Update User</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="user : ${users}">
+        <td th:text="${user.id}"></td>
+        <td th:text="${user.name}"></td>
+        <td th:text="${user.lastName}"></td>
+        <td th:text="${user.age}"></td>
+        <td>
+            <form th:method="post" th:action="@{/delete(id=${user.id})}">
+                <input type="submit" value="Delete">
+            </form>
+        </td>
+        <td>
+            <form th:method="post" th:action="@{/update(id=${user.id})}" th:object="${user}">
+                <input id="nameToUpdate" placeholder="Enter First Name" required type="text" th:field="*{name}"/>
+                <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" style="color:red;"></div>
+
+                <input id="lastNameToUpdate" placeholder="Enter Last Name" required type="text" th:field="*{lastName}"/>
+                <div th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}" style="color:red;"></div>
+
+                <input id="ageToUpdate" placeholder="Enter Age" required type="text" th:field="*{age}"/>
+                <div th:if="${#fields.hasErrors('age')}" th:errors="*{age}" style="color:red;"></div>
+
+                <input type="submit" value="Update User">
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>
