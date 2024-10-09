@@ -27,10 +27,9 @@ public class AdminController {
 
     @GetMapping
     public String adminHome(Model model, @AuthenticationPrincipal User user) {
-        System.out.println("User: " + user);
-        System.out.println("Roles: " + user.getRoles());
         model.addAttribute("currentUser", user);
         model.addAttribute("users", usersService.findAll());
+        model.addAttribute("user", new User());  // Добавляем атрибут "user"
         return "adminHome";
     }
 
@@ -121,6 +120,7 @@ public class AdminController {
         existingUser.setName(user.getName());
         existingUser.setLastName(user.getLastName());
         existingUser.setAge(user.getAge());
+        existingUser.setEmail(user.getEmail()); // Обновляем почту
 
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
             existingUser.setPassword(user.getPassword());
@@ -132,8 +132,9 @@ public class AdminController {
         }
 
         usersService.update(id, existingUser);
-        return "redirect:/admin/users";
+        return "redirect:/admin";
     }
+
 
     @GetMapping("/users/delete/{id}")
     public String deleteUser(@PathVariable("id") Long id, Model model) {
