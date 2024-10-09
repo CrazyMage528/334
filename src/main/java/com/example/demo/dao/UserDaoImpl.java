@@ -76,4 +76,13 @@ public class UserDaoImpl implements UserDAO {
     public void saveUserWithRoles(User user) {
         entityManager.persist(user);
     }
+
+    @Override
+    public User findByEmail(String email) {
+        List<User> users = entityManager.createQuery("select u from User u where u.email = :email", User.class)
+                .setParameter("email", email)
+                .getResultList();
+        return users.isEmpty() ? null : users.get(0);
+    }
+
 }

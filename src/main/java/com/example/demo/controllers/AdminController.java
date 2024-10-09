@@ -4,6 +4,7 @@ import com.example.demo.models.Role;
 import com.example.demo.models.User;
 import com.example.demo.services.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -25,9 +26,15 @@ public class AdminController {
     }
 
     @GetMapping
-    public String adminHome() {
+    public String adminHome(Model model, @AuthenticationPrincipal User user) {
+        System.out.println("User: " + user);
+        System.out.println("Roles: " + user.getRoles());
+        model.addAttribute("currentUser", user);
+        model.addAttribute("users", usersService.findAll());
         return "adminHome";
     }
+
+
 
     @GetMapping("/users")
     public String showAllUsers(Model model) {
@@ -39,7 +46,8 @@ public class AdminController {
     @PostMapping("/users")
     public String createUser(@ModelAttribute("user") @Valid User user, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
-            return "createUser";
+            model.addAttribute("users", usersService.findAll());
+            return "adminHome";
         }
 
         Role userRole = usersService.findRoleByName("ROLE_USER");
@@ -65,10 +73,13 @@ public class AdminController {
             }
         }
         user.setRoles(selectedRoles);
+        usersService.saveUserWithRoles(user);
 
-        usersService.save(user);
-        return "redirect:/admin/users";
+        model.addAttribute("users", usersService.findAll());
+        model.addAttribute("user", new User());
+        return "adminHome";
     }
+
 
     @GetMapping("/users/edit/{id}")
     public String editUserForm(@PathVariable("id") Long id, Model model) {
@@ -124,8 +135,18 @@ public class AdminController {
         return "redirect:/admin/users";
     }
 
+    @GetMapping("/users/delete/{id}")
+    public String deleteUser(@PathVariable("id") Long id, Model model) {
+        User user = usersService.findOne(id);
+        if (user != null) {
+            user.getRoles().clear(); // Удаляем все роли у пользователя перед удалением пользователя
+            usersService.update(id, user); // Обновляем пользователя без ролей
+            usersService.delete(id); // Теперь удаляем пользователя
+        }
 
-
-
+        model.addAttribute("users", usersService.findAll());
+        model.addAttribute("user", new User());
+        return "adminHome";
+    }
 
 }

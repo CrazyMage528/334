@@ -17,6 +17,11 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotEmpty(message = "Email can't be empty")
+    @Email(message = "Email should be valid")
+    @Column(unique = true, nullable = false)
+    private String email;
+
     @Column(nullable = false)
     private String originalPassword;
 
@@ -42,24 +47,20 @@ public class User implements UserDetails {
     )
     private Set<Role> roles = new HashSet<>();
 
-    @PrePersist
-    @PreUpdate
-    private void ensureId() {
-        if (this.roles != null && !this.roles.isEmpty()) {
-            for (Role role : this.roles) {
-                if (role.getId() == null) {
-                    throw new RuntimeException("Role ID cannot be null");
-                }
-            }
-        }
-    }
-
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getName() {
