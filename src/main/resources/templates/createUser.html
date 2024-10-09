@@ -2,34 +2,9 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>All Users</title>
+    <title>Create User</title>
 </head>
 <body>
-<h1>All Users</h1>
-<table>
-    <tr>
-        <th>Name</th>
-        <th>Last Name</th>
-        <th>Age</th>
-        <th>Roles</th>
-        <th>Actions</th>
-    </tr>
-    <tr th:each="user : ${users}">
-        <td th:text="${user.name}"></td>
-        <td th:text="${user.lastName}"></td>
-        <td th:text="${user.age}"></td>
-        <td>
-            <ul>
-                <li th:each="role : ${user.roles}" th:text="${role.name}"></li>
-            </ul>
-        </td>
-        <td>
-            <a th:href="@{/admin/users/edit/{id}(id=${user.id})}">Edit</a>
-            <a th:href="@{/admin/users/delete/{id}(id=${user.id})}">Delete</a>
-        </td>
-    </tr>
-</table>
-
 <h1>Create User</h1>
 <form th:action="@{/admin/users}" th:object="${user}" method="post">
     <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" style="color: red;"></p>

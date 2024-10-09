@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>User Home</title>
+</head>
+<body>
+<h1>Welcome, <span th:text="${user.name}"></span>!</h1>
+<p>Last Name: <span th:text="${user.lastName}"></span></p>
+<p>Age: <span th:text="${user.age}"></span></p>
+<p>Roles:</p>
+<ul>
+  <li th:each="role : ${user.roles}" th:text="${role.name}"></li>
+</ul>
+<a th:href="@{/logout}">Logout</a>
+</body>
+</html>
