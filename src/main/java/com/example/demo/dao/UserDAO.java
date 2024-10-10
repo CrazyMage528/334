@@ -11,9 +11,9 @@ public interface UserDAO {
     void save(User user);
     void delete(Long id);
     void update(Long id, User user);
-    void saveRole(Role role);
     Role findRoleByName(String roleName);
-    User findByEmail(String email); // добавим метод
     User findByUsername(String username);
+    void saveRole(Role role);
     void saveUserWithRoles(User user);
+    User findByEmail(String email);
 }

@@ -2,19 +2,16 @@ package com.example.demo.services;
 
 import com.example.demo.models.Role;
 import com.example.demo.models.User;
-
 import java.util.List;
 
 public interface UsersService {
     List<User> findAll();
     User findOne(Long id);
-    void save(User user);
-    void delete(Long id);
-    void update(Long id, User user);
-    void saveRole(Role role);
-    Role findRoleByName(String roleName);
     User findByUsername(String username);
-    void saveUserWithRoles(User user); // добавляем метод
+    Role findRoleByName(String roleName);
+    void saveRole(Role role);
+    void createUser(User user);
+    void updateUser(Long id, User updatedUser);
+    void deleteUser(Long id);
+    void save(User user);
 }
-
-

@@ -41,47 +41,7 @@ public class UsersController {
             bindingResult.getAllErrors().forEach(error -> System.out.println(error.getDefaultMessage()));
             return "register";
         }
-
-        User existingUser = usersService.findByUsername(user.getName());
-        if (existingUser != null) {
-            bindingResult.rejectValue("name", "error.user", "A user with this username already exists.");
-            model.addAttribute("users", usersService.findAll());
-            return "register";
-        }
-
-        if (user.getRoles() == null || user.getRoles().isEmpty()) {
-            bindingResult.rejectValue("roles", "error.user", "At least one role must be selected.");
-            model.addAttribute("users", usersService.findAll());
-            return "register";
-        }
-
-        Role userRole = usersService.findRoleByName("ROLE_USER");
-        if (userRole == null) {
-            userRole = new Role();
-            userRole.setName("ROLE_USER");
-            usersService.saveRole(userRole);
-        }
-
-        Role adminRole = usersService.findRoleByName("ROLE_ADMIN");
-        if (adminRole == null) {
-            adminRole = new Role();
-            adminRole.setName("ROLE_ADMIN");
-            usersService.saveRole(adminRole);
-        }
-
-        Set<Role> selectedRoles = new HashSet<>();
-        for (Role role : user.getRoles()) {
-            if (role.getName().equals("ROLE_ADMIN")) {
-                selectedRoles.add(adminRole);
-            } else if (role.getName().equals("ROLE_USER")) {
-                selectedRoles.add(userRole);
-            }
-        }
-        user.setRoles(selectedRoles);
-        usersService.saveUserWithRoles(user);
-
-        model.addAttribute("users", usersService.findAll());
-        model.addAttribute("user", new User());
+        usersService.createUser(user);  // Перенесли логику в сервисный слой
         return "register";
     }
 

@@ -36,12 +36,14 @@ public class UserDaoImpl implements UserDAO {
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
-        User user = findOne(id);
+        User user = entityManager.find(User.class, id);
         if (user != null) {
             entityManager.remove(user);
         }
     }
+
 
     @Override
     @Transactional
@@ -84,5 +86,4 @@ public class UserDaoImpl implements UserDAO {
                 .getResultList();
         return users.isEmpty() ? null : users.get(0);
     }
-
 }
