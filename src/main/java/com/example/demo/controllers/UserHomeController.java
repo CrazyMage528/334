@@ -2,6 +2,7 @@ package com.example.demo.controllers;
 
 import com.example.demo.models.User;
 import com.example.demo.services.UsersService;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,7 +25,9 @@ public class UserHomeController {
     @GetMapping
     public String userHome(Model model, Principal principal) {
         User user = usersService.findByUsername(principal.getName());
+        Hibernate.initialize(user.getRoles()); // Инициализируем роли
         model.addAttribute("user", user);
         return "userHome";
     }
+
 }

@@ -4,21 +4,13 @@ import com.example.demo.dao.UserDAO;
 import com.example.demo.models.Role;
 import com.example.demo.models.User;
 import jakarta.transaction.Transactional;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
-
-import com.example.demo.dao.UserDAO;
-import com.example.demo.models.Role;
-import com.example.demo.models.User;
-import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Service
@@ -44,21 +36,43 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
+    @Transactional
     public List<User> findAll() {
-        return userDAO.findAll();
+        List<User> users = userDAO.findAll();
+        users.forEach(this::initializeRoles);
+        return users;
     }
 
     @Override
+    @Transactional
     public User findOne(Long id) {
-        return userDAO.findOne(id);
+        User user = userDAO.findOne(id);
+        initializeRoles(user);
+        return user;
     }
 
     @Override
+    @Transactional
     public User findByUsername(String username) {
-        return userDAO.findByUsername(username);
+        User user = userDAO.findByUsername(username);
+        if (user != null) {
+            initializeRoles(user);
+        }
+        return user;
     }
 
     @Override
+    @Transactional
+    public User findByEmail(String email) {
+        User user = userDAO.findByEmail(email);
+        if (user != null) {
+            initializeRoles(user);
+        }
+        return user;
+    }
+
+    @Override
+    @Transactional
     public Role findRoleByName(String roleName) {
         return userDAO.findRoleByName(roleName);
     }
@@ -72,6 +86,16 @@ public class UsersServiceImpl implements UsersService {
     @Override
     @Transactional
     public void createUser(User user) {
+        User existingUser = userDAO.findByEmail(user.getEmail());
+        if (existingUser != null) {
+            throw new DataIntegrityViolationException("User with this email already exists.");
+        }
+
+        existingUser = userDAO.findByUsername(user.getName());
+        if (existingUser != null) {
+            throw new DataIntegrityViolationException("User with this username already exists.");
+        }
+
         Role userRole = findRoleByName("ROLE_USER");
         if (userRole == null) {
             userRole = new Role();
@@ -121,10 +145,15 @@ public class UsersServiceImpl implements UsersService {
     public void deleteUser(Long id) {
         User user = userDAO.findOne(id);
         if (user != null) {
-            user.getRoles().clear(); // Удаляем все роли у пользователя перед удалением
+            user.getRoles().clear();
             userDAO.update(id, user);
-            userDAO.delete(id); // Теперь удаляем пользователя
+            userDAO.delete(id);
         }
     }
 
+    private void initializeRoles(User user) {
+        if (user != null) {
+            Hibernate.initialize(user.getRoles());
+        }
+    }
 }
