@@ -5,7 +5,10 @@
     <title>Admin Panel</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"
           integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
-    <link rel="stylesheet" href="main.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.min.js" integrity="sha384-VHvPCCyXqtD5DqJeNxl2dtTyhF78xXNXdkwX1CZeRusQfRKp+tA7hAShOK/B/fQ2" crossorigin="anonymous"></script>
+
 </head>
 <body>
 <header>
@@ -25,10 +28,6 @@
         </span>
     </nav>
 </header>
-
-
-
-
 
 <section>
     <div class="row vh-100 mt-3" id="one">
@@ -72,23 +71,8 @@
                                                 <th>Actions</th>
                                             </tr>
                                             </thead>
-                                            <tbody>
-                                            <tr th:each="user : ${users}">
-                                                <td th:text="${user.id}">ID</td>
-                                                <td th:text="${user.name}">First Name</td>
-                                                <td th:text="${user.lastName}">Last Name</td>
-                                                <td th:text="${user.age}">Age</td>
-                                                <td th:text="${user.email}">Email</td>
-                                                <td>
-                                                        <span th:each="role : ${user.roles}">
-                                                            <span th:text="${#strings.replace(role.name, 'ROLE_', '')}"></span>
-                                                        </span>
-                                                </td>
-                                                <td>
-                                                    <button class="btn btn-primary btn-sm" data-toggle="modal" th:data-target="'#editModal-' + ${user.id}">Edit</button>
-                                                    <button class="btn btn-danger btn-sm" data-toggle="modal" th:data-target="'#deleteModal-' + ${user.id}">Delete</button>
-                                                </td>
-                                            </tr>
+                                            <tbody id="userTableBody">
+                                            <!-- Users will be dynamically loaded here by JavaScript -->
                                             </tbody>
                                         </table>
                                     </div>
@@ -97,37 +81,37 @@
                             <div class="tab-pane fade" id="create-user" role="tabpanel" aria-labelledby="new-user-tab">
                                 <div class="container-fluid border border-gray-500 bg-white">
                                     <div class="row-fluid mt-3">
-                                        <form th:action="@{/admin/users}" th:object="${user}" method="post" class="form-group">
+                                        <form id="createUserForm" method="post" class="form-group">
                                             <div class="mb-3">
                                                 <label>First Name</label>
-                                                <input type="text" th:field="*{name}" class="form-control" required/>
+                                                <input type="text" id="newUserFirstName" class="form-control" required/>
                                             </div>
                                             <div class="mb-3">
                                                 <label>Last Name</label>
-                                                <input type="text" th:field="*{lastName}" class="form-control" required/>
+                                                <input type="text" id="newUserLastName" class="form-control" required/>
                                             </div>
                                             <div class="mb-3">
                                                 <label>Age</label>
-                                                <input type="number" th:field="*{age}" class="form-control" required min="1"/>
+                                                <input type="number" id="newUserAge" class="form-control" required min="1"/>
                                             </div>
                                             <div class="mb-3">
                                                 <label>Email</label>
-                                                <input type="email" th:field="*{email}" class="form-control" required/>
+                                                <input type="email" id="newUserEmail" class="form-control" required/>
                                             </div>
                                             <div class="mb-3">
                                                 <label>Password</label>
-                                                <input type="password" th:field="*{password}" class="form-control" required/>
+                                                <input type="password" id="newUserPassword" class="form-control" required/>
                                             </div>
                                             <div class="mb-3">
                                                 <label>Roles:</label>
                                                 <div>
                                                     <label class="form-check-label">
-                                                        <input type="checkbox" class="form-check-input" th:value="ROLE_USER" th:field="*{roles}"> User
+                                                        <input type="checkbox" class="form-check-input" value="ROLE_USER" id="newUserRoleUser"> User
                                                     </label>
                                                 </div>
                                                 <div>
                                                     <label class="form-check-label">
-                                                        <input type="checkbox" class="form-check-input" th:value="ROLE_ADMIN" th:field="*{roles}"> Admin
+                                                        <input type="checkbox" class="form-check-input" value="ROLE_ADMIN" id="newUserRoleAdmin"> Admin
                                                     </label>
                                                 </div>
                                             </div>
@@ -140,7 +124,7 @@
                     </div>
                 </div>
                 <!-- Modal for Editing User -->
-                <div th:each="user : ${users}" th:id="'editModal-' + ${user.id}" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+                <div id="editModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -150,40 +134,41 @@
                                 </button>
                             </div>
                             <div class="modal-body">
-                                <form th:action="@{/admin/users/update/{id}(id=${user.id})}" th:object="${user}" method="post" class="form-group">
+                                <form id="editUserForm" class="form-group">
                                     <div class="mb-3">
                                         <label for="editName">First Name</label>
-                                        <input type="text" th:field="*{name}" class="form-control" id="editName" required/>
+                                        <input type="text" id="editName" class="form-control" required/>
                                     </div>
                                     <div class="mb-3">
                                         <label for="editLastName">Last Name</label>
-                                        <input type="text" th:field="*{lastName}" class="form-control" id="editLastName" required/>
+                                        <input type="text" id="editLastName" class="form-control" required/>
                                     </div>
                                     <div class="mb-3">
                                         <label for="editAge">Age</label>
-                                        <input type="number" th:field="*{age}" class="form-control" id="editAge" required min="1"/>
+                                        <input type="number" id="editAge" class="form-control" required min="1"/>
                                     </div>
                                     <div class="mb-3">
                                         <label for="editEmail">Email</label>
-                                        <input type="email" th:field="*{email}" class="form-control" id="editEmail" required/>
+                                        <input type="email" id="editEmail" class="form-control" required/>
                                     </div>
                                     <div class="mb-3">
                                         <label for="editPassword">Password</label>
-                                        <input type="password" th:field="*{password}" class="form-control" id="editPassword"/>
+                                        <input type="password" id="editPassword" class="form-control"/>
                                     </div>
                                     <div class="mb-3">
                                         <label>Roles:</label>
                                         <div>
                                             <label class="form-check-label">
-                                                <input type="checkbox" class="form-check-input" th:value="ROLE_USER" th:field="*{roles}"> User
+                                                <input type="checkbox" class="form-check-input" value="ROLE_USER" id="editUserRoleUser"> User
                                             </label>
                                         </div>
                                         <div>
                                             <label class="form-check-label">
-                                                <input type="checkbox" class="form-check-input" th:value="ROLE_ADMIN" th:field="*{roles}"> Admin
+                                                <input type="checkbox" class="form-check-input" value="ROLE_ADMIN" id="editUserRoleAdmin"> Admin
                                             </label>
                                         </div>
                                     </div>
+                                    <input type="hidden" id="editUserId">
                                     <button type="submit" class="btn btn-primary">Update User</button>
                                 </form>
                             </div>
@@ -191,7 +176,7 @@
                     </div>
                 </div>
                 <!-- Modal for Deleting User -->
-                <div th:each="user : ${users}" th:id="'deleteModal-' + ${user.id}" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div id="deleteModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -201,18 +186,18 @@
                                 </button>
                             </div>
                             <div class="modal-body">
-                                <p>ID: <span th:text="${user.id}"></span></p>
-                                <p>First name: <span th:text="${user.name}"></span></p>
-                                <p>Last name: <span th:text="${user.lastName}"></span></p>
-                                <p>Age: <span th:text="${user.age}"></span></p>
-                                <p>Email: <span th:text="${user.email}"></span></p>
+                                <p>ID: <span id="deleteUserId"></span></p>
+                                <p>First name: <span id="deleteUserName"></span></p>
+                                <p>Last name: <span id="deleteUserLastName"></span></p>
+                                <p>Age: <span id="deleteUserAge"></span></p>
+                                <p>Email: <span id="deleteUserEmail"></span></p>
                                 <p>Role:
-                                    <span th:each="role : ${user.roles}" th:text="${role.name}">ROLE</span>
+                                    <span id="deleteUserRoles"></span>
                                 </p>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                <a th:href="@{/admin/users/delete/{id}(id=${user.id})}" class="btn btn-danger">Delete</a>
+                                <button type="button" class="btn btn-danger" onclick="deleteUser()">Delete</button>
                             </div>
                         </div>
                     </div>
@@ -221,8 +206,154 @@
         </div>
     </div>
 </section>
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.min.js" integrity="sha384-VHvPCCyXqtD5DqJeNxl2dtTyhF78xXNXdkwX1CZeRusQfRKp+tA7hAShOK/B/fQ2" crossorigin="anonymous"></script>
-</body>
-</html>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        loadUsers();
+
+        document.getElementById('createUserForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            createUser();
+        });
+
+        document.getElementById('editUserForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            updateUser();
+        });
+    });
+
+    function loadUsers() {
+        fetch('/api/users')
+            .then(response => response.json())
+            .then(users => {
+                const userTableBody = document.getElementById('userTableBody');
+                userTableBody.innerHTML = '';
+                users.forEach(user => {
+                    const row = document.createElement('tr');
+                                    row.innerHTML = `
+                       <td>${user.id}</td>
+                       <td>${user.name}</td>
+                       <td>${user.lastName}</td>
+                       <td>${user.age}</td>
+                       <td>${user.email}</td>
+                       <td>${user.roles.map(role => role.name.replace('ROLE_', '')).join(' ')}</td>
+                       <td>
+                           <button class="btn btn-primary btn-sm" onclick="openEditModal(${user.id})">Edit</button>
+                           <button class="btn btn-danger btn-sm" onclick="openDeleteModal(${user.id})">Delete</button>
+                       </td>
+                   `;
+                    userTableBody.appendChild(row);
+                });
+            });
+    }
+    function createUser() {
+        const newUser = {
+            name: document.getElementById('newUserFirstName').value,
+            lastName: document.getElementById('newUserLastName').value,
+            age: document.getElementById('newUserAge').value,
+            email: document.getElementById('newUserEmail').value,
+            password: document.getElementById('newUserPassword').value,
+            roles: [
+                document.getElementById('newUserRoleUser').checked ? { name: 'ROLE_USER' } : null,
+                document.getElementById('newUserRoleAdmin').checked ? { name: 'ROLE_ADMIN' } : null
+            ].filter(Boolean)
+        };
+
+        fetch('/api/users', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(newUser)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(() => {
+                loadUsers();
+                $('#users-table-tab').tab('show');
+            });
+    }
+
+
+
+    function openEditModal(id) {
+        fetch(`/api/users/${id}`)
+            .then(response => response.json())
+            .then(user => {
+                document.getElementById('editUserId').value = user.id;
+                document.getElementById('editName').value = user.name;
+                document.getElementById('editLastName').value = user.lastName;
+                document.getElementById('editAge').value = user.age;
+                document.getElementById('editEmail').value = user.email;
+                document.getElementById('editPassword').value = '';
+                document.getElementById('editUserRoleUser').checked = user.roles.some(role => role.name === 'ROLE_USER');
+                document.getElementById('editUserRoleAdmin').checked = user.roles.some(role => role.name === 'ROLE_ADMIN');
+
+                $('#editModal').modal('show');
+            });
+    }
+
+    function updateUser() {
+        const id = document.getElementById('editUserId').value;
+        const updatedUser = {
+            id: id,
+            name: document.getElementById('editName').value,
+            lastName: document.getElementById('editLastName').value,
+            age: document.getElementById('editAge').value,
+            email: document.getElementById('editEmail').value,
+            password: document.getElementById('editPassword').value,
+            roles: [
+                document.getElementById('editUserRoleUser').checked ? { name: 'ROLE_USER' } : null,
+                document.getElementById('editUserRoleAdmin').checked ? { name: 'ROLE_ADMIN' } : null
+            ].filter(Boolean)
+        };
+
+        fetch(`/api/users/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedUser)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(() => {
+                loadUsers();
+                $('#editModal').modal('hide');
+            });
+    }
+
+
+    function openDeleteModal(id) {
+        fetch(`/api/users/${id}`)
+            .then(response => response.json())
+            .then(user => {
+                document.getElementById('deleteUserId').textContent = user.id;
+                document.getElementById('deleteUserName').textContent = user.name;
+                document.getElementById('deleteUserLastName').textContent = user.lastName;
+                document.getElementById('deleteUserAge').textContent = user.age;
+                document.getElementById('deleteUserEmail').textContent = user.email;
+                document.getElementById('deleteUserRoles').textContent = user.roles.map(role => role.name.replace('ROLE_', '')).join(' ');
+                $('#deleteModal').modal('show');
+            });
+    }
+
+    function deleteUser() {
+        const id = document.getElementById('deleteUserId').textContent;
+
+        fetch(`/api/users/${id}`, {
+            method: 'DELETE'
+        })
+            .then(() => {
+                loadUsers();
+                $('#deleteModal').modal('hide');
+            });
+    }
+</script>

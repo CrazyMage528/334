@@ -86,4 +86,28 @@ public class UserDaoImpl implements UserDAO {
                 .getResultList();
         return users.isEmpty() ? null : users.get(0);
     }
+    @Override
+    public List<Role> findAllRoles() {
+        return entityManager.createQuery("select r from Role r", Role.class).getResultList();
+    }
+
+    @Override
+    public Role findRoleById(Long id) {
+        return entityManager.find(Role.class, id);
+    }
+
+    @Override
+    @Transactional
+    public void updateRole(Long id, Role role) {
+        entityManager.merge(role);
+    }
+
+    @Override
+    @Transactional
+    public void deleteRole(Long id) {
+        Role role = entityManager.find(Role.class, id);
+        if (role != null) {
+            entityManager.remove(role);
+        }
+    }
 }

@@ -134,6 +134,10 @@ public class UsersServiceImpl implements UsersService {
 
         if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
             existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+            existingUser.setOriginalPassword(updatedUser.getPassword());
+        } else {
+            updatedUser.setPassword(existingUser.getPassword());
+            updatedUser.setOriginalPassword(existingUser.getOriginalPassword());
         }
 
         Set<Role> attachedRoles = new HashSet<>();
@@ -149,9 +153,6 @@ public class UsersServiceImpl implements UsersService {
 
         userDAO.update(id, existingUser);
     }
-
-
-
     @Override
     @Transactional
     public void deleteUser(Long id) {
@@ -167,5 +168,28 @@ public class UsersServiceImpl implements UsersService {
         if (user != null) {
             Hibernate.initialize(user.getRoles());
         }
+    }
+    @Override
+    @Transactional
+    public List<Role> findAllRoles() {
+        return userDAO.findAllRoles();
+    }
+
+    @Override
+    @Transactional
+    public Role findRoleById(Long id) {
+        return userDAO.findRoleById(id);
+    }
+
+    @Override
+    @Transactional
+    public void updateRole(Long id, Role role) {
+        userDAO.updateRole(id, role);
+    }
+
+    @Override
+    @Transactional
+    public void deleteRole(Long id) {
+        userDAO.deleteRole(id);
     }
 }

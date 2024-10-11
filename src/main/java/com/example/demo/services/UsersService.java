@@ -20,4 +20,8 @@ public interface UsersService {
     void updateUser(Long id, User updatedUser);
     void deleteUser(Long id);
     void save(User user);
+    List<Role> findAllRoles();
+    Role findRoleById(Long id);
+    void updateRole(Long id, Role role);
+    void deleteRole(Long id);
 }
