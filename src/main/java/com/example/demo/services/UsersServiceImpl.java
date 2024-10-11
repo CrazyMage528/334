@@ -136,9 +136,21 @@ public class UsersServiceImpl implements UsersService {
             existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
         }
 
-        existingUser.setRoles(updatedUser.getRoles());
+        Set<Role> attachedRoles = new HashSet<>();
+        for (Role role : updatedUser.getRoles()) {
+            Role attachedRole = userDAO.findRoleByName(role.getName());
+            if (attachedRole == null) {
+                userDAO.saveRole(role);
+                attachedRole = role;
+            }
+            attachedRoles.add(attachedRole);
+        }
+        existingUser.setRoles(attachedRoles);
+
         userDAO.update(id, existingUser);
     }
+
+
 
     @Override
     @Transactional

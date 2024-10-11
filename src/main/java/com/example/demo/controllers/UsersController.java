@@ -11,11 +11,8 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 public class UsersController {
 
-    private final UsersService usersService;
-
     @Autowired
     public UsersController(UsersService usersService) {
-        this.usersService = usersService;
     }
 
     @GetMapping("/")
@@ -26,12 +23,6 @@ public class UsersController {
     @GetMapping("/login")
     public String showLoginForm() {
         return "login";
-    }
-
-    @GetMapping("/users")
-    public String showAllUsers(Model model) {
-        model.addAttribute("users", usersService.findAll());
-        return "users";
     }
 
 }
